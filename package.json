@@ -1,0 +1,18 @@
+{
+  "name": "aerender",
+  "version": "1.0.0",
+  "description": "a package for aerender for js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.code.oa.com:ATV/aerender.git"
+  },
+  "keywords": [
+    "aerender"
+  ],
+  "author": "dravenwu",
+  "license": "ISC"
+}
