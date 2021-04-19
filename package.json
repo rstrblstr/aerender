@@ -4,7 +4,7 @@
   "description": "a package for aerender for js",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -14,5 +14,22 @@
     "aerender"
   ],
   "author": "dravenwu",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^26.0.22",
+    "jest": "^26.6.3"
+  },
+  "dependencies": {
+    "@nexrender/core": "^1.26.1",
+    "@nexrender/types": "^1.27.0",
+    "data-uri-to-buffer": "^3.0.1",
+    "file-uri-to-path": "^2.0.0",
+    "is-wsl": "^2.2.0",
+    "match-all": "^1.2.6",
+    "mime-types": "^2.1.30",
+    "node-fetch": "^2.6.1",
+    "requireg": "^0.2.2",
+    "rimraf": "^3.0.2",
+    "shortid": "^2.2.16"
+  }
 }

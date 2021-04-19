@@ -1,5 +1,7 @@
 .vscode
 .idea
-
+100000
 build
 node_modules
+.DS_Store
+aerender-*.log
