@@ -3,6 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const shortid = require('shortid');
 const autofind = require('./autofind.js');
+const patch = require('./patch.js');
 const chalk  = require('chalk');
 
 const debugLog = (type, msg) => {
@@ -81,6 +82,7 @@ const formatSettings = (settings) => {
     settings.workpath = path.join(process.cwd(), settings.workpath);
   }
   settings.loger = debugLog;
+  patch(settings);
   return settings;
 }
 

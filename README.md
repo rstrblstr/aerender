@@ -18,5 +18,9 @@ const options = {
 const settings = {
 
 }
-const res = await render(options, settings);
+try {
+    const res = await render(options, settings);
+} catch(error) {
+    console.log(error);
+}
 ```

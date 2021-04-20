@@ -23,7 +23,7 @@ describe('测试入口', () => {
           type: 'image',
           layerIndex: 7,
           name: "color-mixkit-logo.png",
-          src: 'file:///Users/wuhongjie/txwork/nexrender/assets/template6/files/color-mixkit-logo.png'
+          src: 'https://tnfe.gtimg.com/image/color-mixkit-logo_1618923853686.png'
         },
         {
           type: 'video',
@@ -67,6 +67,7 @@ describe('测试入口', () => {
       workpath: workpath,
       stopOnError: false,
       multiFrames: true,
+      skipCleanup: true,
     });
     const output = path.resolve(workpath, './output/test-01.mov');
     expect(res.output === output).toBeTruthy();
