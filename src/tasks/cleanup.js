@@ -5,18 +5,18 @@ const rimraf = require('rimraf')
  */
 module.exports = function(job, settings) {
     if (settings.skipCleanup) {
-        console.log(`[${job.uid}] skipping the clean up...`);
+        settings.loger(`${job.uid}::cleanup`, `skipping the clean up...`);
         return Promise.resolve(job)
     }
 
     return new Promise((resolve, reject) => {
-        console.log(`[${job.uid}] cleaning up...`);
+        settings.loger(`${job.uid}::cleanup`, `cleaning up...`);
 
         rimraf(job.workpath, {glob: false}, (err) => {
             if (!err) {
-                console.log(`[${job.uid}] Temporary AfterEffects project deleted. If you want to inspect it for debugging, use "--skip-cleanup"`)
+                settings.loger(`${job.uid}::cleanup`, `Temporary AfterEffects project deleted`);
             } else {
-                console.log(`[${job.uid}] Temporary AfterEffects could not be deleted. (Error: ${err.code}). Please delete the folder manually: ${job.workpath}`)
+                settings.loger(`${job.uid}::cleanup`, `Temporary AfterEffects could not be deleted`);
             }
 
             resolve(job)

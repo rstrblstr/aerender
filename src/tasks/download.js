@@ -132,12 +132,14 @@ const download = (job, settings, asset) => {
  * and place it nearby the project asset
  */
 module.exports = function(job, settings) {
-  console.log(`[${job.uid}] downloading assets...`)
-
+  settings.loger(`${job.uid}::download`, `downloading assets...`);
   const promises = [].concat(
     download(job, settings, job.template),
     job.assets.map(asset => download(job, settings, asset))
   )
 
-  return Promise.all(promises).then(_ => job);
+  return Promise.all(promises).then(_ => {
+    settings.loger(`${job.uid}::download`, `downloading assets done`);
+    return job
+  });
 }

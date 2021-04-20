@@ -1,11 +1,13 @@
 const start = require('../src/index.js');
+const path = require('path');
 describe('测试入口', () => {
   it('测试1+1=2', () => {
     expect(1 + 1).toBe(2)
   });
-  test("test start", async () => {
-   await start({
-      uid: '100004',
+  test("test start", async() => {
+    const workpath = path.resolve(__dirname, `../`);
+    const res = await start({
+      uid: '100000',
       template: {
         src: 'file:///Users/wuhongjie/txwork/nexrender/assets/template6/template6.aepx',
         frameStart: 1,
@@ -13,6 +15,8 @@ describe('测试入口', () => {
         composition: 'Travel Opener Comp',
         outputModule: 'QuickTime DV PAL 48kHz',
         continueOnMissing: true,
+        outputFileName: 'test-01',
+        outputExt: 'mov'
       },
       assets: [
         {
@@ -60,8 +64,11 @@ describe('测试入口', () => {
       ],
       actions: [],
     }, {
-     workpath: '',
-     skipCleanup: true
-   });
+      workpath: workpath,
+      stopOnError: false,
+      multiFrames: true,
+    });
+    const output = path.resolve(workpath, './output/test-01.mov');
+    expect(res.output === output).toBeTruthy();
   });
 });

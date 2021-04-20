@@ -12,18 +12,11 @@ const cleanup    = require('./tasks/cleanup');
 
 /**
  *
- * @param options
- * @return {Promise<{}>}
+ * @param job
+ * @param settings
+ * @return {Promise<{} | void>}
  */
-const init = async function(job = {}, settings = {}) {
-  // const check = validate(options);
-  // options = formatOption(options);
-  // settings = formatSettings(settings);
-  // if(!check) {
-  //   throw new Error('options check failed');
-  // }
-  // const result = await render(options, settings);
-  // return result;
+module.exports = async function(job = {}, settings = {}) {
 
   settings = formatSettings(settings);
 
@@ -32,9 +25,10 @@ const init = async function(job = {}, settings = {}) {
     .then(job => state(job, settings, download, 'download'))
     .then(job => state(job, settings, preRender, 'prerender'))
     .then(job => state(job, settings, script, 'script'))
-    .then(job => state(job, settings, render, 'dorender'))
+    .then(job => state(job, settings, render, 'render'))
     .then(job => state(job, settings, postRender, 'postrender'))
     .then(job => state(job, settings, cleanup, 'cleanup'))
+    .catch((error) => {
+      console.error(error);
+    })
 }
-
-module.exports = init;

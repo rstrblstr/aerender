@@ -1,9 +1,17 @@
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const isWsl = require('is-wsl');
 const shortid = require('shortid');
 const autofind = require('./autofind.js');
+const chalk  = require('chalk');
+
+const debugLog = (type, msg) => {
+  if (!msg) {
+    msg = type;
+    type = 'common';
+  }
+  console.log(chalk.bgMagentaBright.bold(`[${type}]:`) + chalk.green(msg));
+}
 
 const formatOption = (options) => {
   const oriTem = options.template;
@@ -13,8 +21,10 @@ const formatOption = (options) => {
     frameEnd: oriTem.frameEnd,
     composition: oriTem.composition || 'Travel Opener Comp',
     outputModule: oriTem.outputModule || 'QuickTime DV PAL 48kHz',
-    outputExt: oriTem.outputExt || 'mp4',
+    outputExt: oriTem.outputExt || (os.platform() === 'darwin' ? 'mov' : 'avi'),
     outputFileName: oriTem.outputFileName || 'result',
+    incrementFrame: oriTem.incrementFrame || 0,
+    continueOnMissing: oriTem.continueOnMissing || false,
   };
   const result = {
     uid: options.uid || shortid(), // id
@@ -25,6 +35,10 @@ const formatOption = (options) => {
       prerender: [],
       postrender: [],
     },
+    output: options.output || '', // 视频文件输出目录
+    onChange: (job, state) => {
+      console.log("=================>", state)
+    }
   };
   return result;
 }
@@ -32,8 +46,6 @@ const formatOption = (options) => {
 
 const formatSettings = (settings) => {
   settings = Object.assign({}, settings);
-  // check for WSL
-  settings.wsl = isWsl
 
   const binaryAuto = autofind(settings);
   const binaryUser = settings.binary && fs.existsSync(settings.binary) ? settings.binary : null;
@@ -43,28 +55,23 @@ const formatSettings = (settings) => {
   }
 
   if (binaryAuto && !binaryUser) {
-    console.log('using automatically determined directory of After Effects installation:')
-    console.log(' - ' + binaryAuto)
+    console.log('using automatically determined directory of After Effects installation: -' + binaryAuto)
   }
 
   settings = Object.assign({
     workpath: path.join(os.tmpdir(), 'aerender'),
-
-    addLicense: false,
     forceCommandLinePatch: false,
     skipCleanup: false,
     skipRender: false,
     stopOnError: true,
-
+    skipScript: true,
     debug: false,
     multiFrames: false,
     maxMemoryPercent: undefined,
     imageCachePercent: undefined,
-    wslMap: undefined,
-
     onInstanceSpawn: undefined,
-
     __initialized: true,
+    reuse: false
   }, settings, {
     binary: binaryAuto//binaryUser || binaryAuto,
   })
@@ -73,19 +80,12 @@ const formatSettings = (settings) => {
   if (!path.isAbsolute(settings.workpath)) {
     settings.workpath = path.join(process.cwd(), settings.workpath);
   }
-
-  // if WSL, ask user to define Mapping
-  if (settings.wsl && !settings.wslMap)
-    throw new Error('WSL detected: provide your WSL drive map; ie. "Z"')
-
-  // attempt to patch the default
-  // Scripts/commandLineRenderer.jsx
-  // patch(settings);
-
+  settings.loger = debugLog;
   return settings;
 }
 
 module.exports = {
   formatOption,
   formatSettings,
+  debugLog,
 };

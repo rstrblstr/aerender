@@ -11,62 +11,26 @@ const { formatOption } = require('../helpers/format');
  */
 module.exports = (job, settings) => {
     /* fill default job fields */
-    console.log(`[${job.uid}] setting up job...`);
+    settings.loger(`${job.uid}::setup`, `setting up job...`);
 
     try {
         assert(validate(job) == true)
     } catch (err) {
-        return Promise.reject('Error veryifing job: ' + err)
-    }
-
-    if (job.template.outputModule && !job.template.outputExt) {
-        console.log(`[${job.uid}] -- W A R N I N G: --
-
-You haven't provided a value for "job.template.outputExt"!
-Since you've choosen a custom outputModule (${job.template.outputModule}),
-nexrender, however, does not know what file extension is expected to be rendered.
-
-To prevent this from happening, please add a string value to "job.template.outputExt".
-An example of how that might look like: { "outputModule": "h264", "outputExt": "mp4" }.\n`);
+        return Promise.reject('Error validate job: ' + err)
     }
 
     job = formatOption(job);
+    job.resultname = job.template.outputFileName + '.' + job.template.outputExt;
 
-    console.log(settings);
-
-
-    // set default job result file name
-    if (job.template.outputExt) {
-        job.resultname = 'result.' + job.template.outputExt;
-    } else {
-        job.resultname = 'result.' + (os.platform() === 'darwin' ? 'mov' : 'avi');
-    }
-
-    // NOTE: for still (jpg) image sequence frame filename will be changed to result_[#####].jpg
-    if (job.template.outputExt && ['jpeg', 'jpg', 'png'].indexOf(job.template.outputExt) !== -1) {
-        job.resultname = 'result_[#####].' + job.template.outputExt;
-        job.template.imageSequence = true;
-    }
-
-    if (!job.actions.postrender && !settings.skipCleanup) {
-        console.log(`[${job.uid}] -- W A R N I N G: --
-
-You haven't provided any post-render actions!
-After render is finished all the files inside temporary folder (INCLUDING your target video) will be removed.
-
-To prevent this from happening, please add an action to "job.actions.postrender".
-For more info checkout: https://github.com/inlife/nexrender#Actions
-
-P.S. to prevent nexrender from removing temp file data, you also can please provide an argument:
-    --skip-cleanup (or skipCleanup: true if using programmatically)\n`);
-    }
-
+    const output = job.output || path.join(settings.workpath, 'output');
     // setup paths
-    job.workpath = path.join(settings.workpath, job.uid);
-    job.output   = job.output || path.join(job.workpath, job.resultname);
+    job.workpath = path.join(output, job.uid);
+    job.output   = path.join(output, job.resultname);
     mkdirp.sync(job.workpath);
+    mkdirp.sync(output);
 
-    console.log(`[${job.uid}] working directory is: ${job.workpath}`);
+    settings.loger(`${job.uid}::setup`, `working directory is: ${job.workpath}`);
+    settings.loger(`${job.uid}::setup`, `working output is: ${job.output}`);
 
     return Promise.resolve(job)
 };

@@ -466,8 +466,10 @@ const wrapEnhancedScript = ({ dest, src, parameters = [], keyword, defaults,  ..
 }
 
 module.exports = (job, settings) => {
-    console.log(`[${job.uid}] running script assemble...`);
-
+    settings.loger(`${job.uid}::script`, `assemble...`);
+    if (settings.skipScript) {
+        return Promise.resolve(job);
+    }
     const data = [];
     const base = job.workpath;
 
@@ -492,9 +494,8 @@ module.exports = (job, settings) => {
     /* write out assembled custom script file in the workpath */
     job.scriptfile = path.join(base, `nexrender-${job.uid}-script.jsx`);
     fs.writeFileSync(job.scriptfile, script
-        .replace('/*COMPOSITION*/', job.template.composition)
-        .replace('/*USERSCRIPT*/', () => data.join('\n'))
+      .replace('/*COMPOSITION*/', job.template.composition)
+      .replace('/*USERSCRIPT*/', () => data.join('\n'))
     );
-
     return Promise.resolve(job)
 }

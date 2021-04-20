@@ -2,6 +2,7 @@
 .idea
 100000
 build
+output
 node_modules
 .DS_Store
 aerender-*.log

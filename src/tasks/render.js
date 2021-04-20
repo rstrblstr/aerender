@@ -18,9 +18,10 @@ const seconds = (string) => string.split(':')
 
 /**
  * This task creates rendering process
+ * https://helpx.adobe.com/cn/after-effects/user-guide.html/cn/after-effects/using/automated-rendering-network-rendering.ug.html
  */
 module.exports = (job, settings) => {
-  console.log(`[${job.uid}] rendering job...`);
+  settings.loger(`${job.uid}::render`, `rendering job...`);
 
   // create container for our parameters
   let params = [];
@@ -32,24 +33,38 @@ module.exports = (job, settings) => {
   params.push('-comp', job.template.composition);
   params.push('-output', outputFile);
 
+  // advanced parameters
   if (!settings.skipRender) {
-    option(params, '-OMtemplate', job.template.outputModule);
-    option(params, '-RStemplate', job.template.settingsTemplate);
-
-    option(params, '-s', job.template.frameStart);
-    option(params, '-e', job.template.frameEnd);
-    option(params, '-i', job.template.incrementFrame);
+    if (job.template.outputModule) {
+      params.push('-OMtemplate', job.template.outputModule);
+    }
+    if (job.template.settingsTemplate) {
+      params.push('-RStemplate', job.template.settingsTemplate);
+    }
+    if (job.template.frameStart) {
+      params.push('-s', job.template.frameStart);
+    }
+    if (job.template.frameEnd) {
+      params.push('-e', job.template.frameEnd);
+    }
+    if (job.template.incrementFrame) {
+      params.push('-i', job.template.incrementFrame);
+    }
   } else {
-    option(params, '-s', 1);
-    option(params, '-e', 1);
+    params.push('-s', 1);
+    params.push('-e', 1);
   }
-  if (job.scriptfile) {
+
+  if (!settings.skipScript && job.scriptfile) {
     option(params, '-r', job.scriptfile);
   }
 
-  if (!settings.skipRender && settings.multiFrames) params.push('-mp');
-  if (settings.reuse) params.push('-reuse');
-  if (job.template.continueOnMissing) params.push('-continueOnMissingFootage')
+  if (!settings.skipRender && settings.multiFrames)
+    params.push('-mp');
+  if (settings.reuse)
+    params.push('-reuse');
+  if (job.template.continueOnMissing)
+    params.push('-continueOnMissingFootage')
 
   if (settings.imageCachePercent || settings.maxMemoryPercent) {
     option(params, '-mem_usage', settings.imageCachePercent || 50, settings.maxMemoryPercent || 50);
@@ -94,7 +109,7 @@ module.exports = (job, settings) => {
       currentProgress = Math.ceil((seconds(matchProgress[1]) - projectStart) * 100 / projectDuration);
 
       if (previousProgress !== currentProgress) {
-        console.log(`[${job.uid}] rendering progress ${currentProgress}%...`);
+        settings.loger(`${job.uid}::render`, `rendering progress ${currentProgress}%...`);
         previousProgress = currentProgress;
         job.renderProgress = currentProgress;
 
@@ -112,12 +127,12 @@ module.exports = (job, settings) => {
     renderStopwatch = Date.now();
 
     if (settings.debug) {
-      console.log(`[${job.uid}] spawning aerender process: ${settings.binary} ${params.join(' ')}`);
+      settings.loger(`${job.uid}::render`, `spawning aerender process: ${settings.binary} ${params.join(' ')}`);
     }
 
     const output = [];
-    console.log(settings.binary);
     const logPath = path.resolve(job.workpath, `../aerender-${job.uid}.log`)
+    console.log(params)
     const instance = spawn(settings.binary, params, {
       // NOTE: disabled PATH for now, there were a few
       // issues related to plugins not working properly
@@ -151,8 +166,8 @@ module.exports = (job, settings) => {
         return reject(new Error(outputStr || 'aerender.exe failed to render the output into the file due to an unknown reason'));
       }
 
-      console.log(`[${job.uid}] rendering took ~${(Date.now() - renderStopwatch) / 1000} sec.`);
-      console.log(`[${job.uid}] writing aerender job log to: ${logPath}`);
+      settings.loger(`${job.uid}::render`, `rendering took ~${(Date.now() - renderStopwatch) / 1000} sec.`);
+      settings.loger(`${job.uid}::render`, `writing aerender job log to: ${logPath}`);
 
       fs.writeFileSync(logPath, outputStr);
 
@@ -163,8 +178,7 @@ module.exports = (job, settings) => {
 
       if (!fs.existsSync(outputFile)) {
         if (fs.existsSync(logPath)) {
-          console.log(`[${job.uid}] dumping aerender log:`)
-          console.log(fs.readFileSync(logPath, 'utf8'))
+          settings.loger(`${job.uid}::render`, `dumping aerender log: ${fs.readFileSync(logPath, 'utf8')}`);
         }
 
         return reject(new Error(`Couldn't find a result file: ${outputFile}`))
@@ -174,7 +188,7 @@ module.exports = (job, settings) => {
 
       /* file smaller than 1000 bytes */
       if (stats.size < 1000) {
-        console.log(`[${job.uid}] Warning: output file size is less than 1000 bytes (${stats.size} bytes), be advised that file is corrupted, or rendering is still being finished`)
+        settings.loger(`${job.uid}::render`, `Warning: output file size is less than 1000 bytes (${stats.size} bytes), be advised that file is corrupted, or rendering is still being finished`);
       }
 
       resolve(job)
