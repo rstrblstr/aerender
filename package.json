@@ -23,16 +23,19 @@
   "dependencies": {
     "@nexrender/core": "^1.26.1",
     "@nexrender/types": "^1.27.0",
+    "aepx": "^0.0.1",
     "chalk": "^4.1.0",
     "data-uri-to-buffer": "^3.0.1",
     "file-uri-to-path": "^2.0.0",
     "is-wsl": "^2.2.0",
+    "js2xmlparser": "^4.0.1",
     "match-all": "^1.2.6",
     "mime-types": "^2.1.30",
     "mkdirp": "^1.0.4",
     "node-fetch": "^2.6.1",
     "requireg": "^0.2.2",
     "rimraf": "^3.0.2",
-    "shortid": "^2.2.16"
+    "shortid": "^2.2.16",
+    "xml2js-parser": "^1.1.1"
   }
 }

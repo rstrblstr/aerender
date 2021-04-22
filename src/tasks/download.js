@@ -5,7 +5,7 @@ const fetch = require('node-fetch').default
 const uri2path = require('file-uri-to-path')
 const data2buf = require('data-uri-to-buffer')
 const mime = require('mime-types')
-const { expandEnvironmentVariables } = require('../helpers/path')
+const { expandEnvironmentVariables } = require('../helpers/path');
 
 const download = (job, settings, asset) => {
   if (asset.type === 'data') return Promise.resolve();
@@ -44,9 +44,6 @@ const download = (job, settings, asset) => {
     destName += '.' + asset.extension
   }
 
-  console.log(protocol)
-  console.log(asset)
-
   asset.dest = path.join(job.workpath, destName);
 
   switch (protocol) {
@@ -69,10 +66,16 @@ const download = (job, settings, asset) => {
       /* TODO: maybe move to external package ?? */
       const src = decodeURI(asset.src) === asset.src ? encodeURI(asset.src) : asset.src
       return fetch(src, asset.params || {})
-        .then(res => res.ok ? res : Promise.reject({
-          reason: 'Initial error downloading file',
-          meta: { src, error: res.error }
-        }))
+        .then((res) => {
+          if (res.ok) {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject({
+              reason: 'Initial error downloading file',
+              meta: { src, error: res.error }
+            })
+          }
+        })
         .then(res => {
           // Set a file extension based on content-type header if not already set
           if (!asset.extension) {
@@ -89,7 +92,10 @@ const download = (job, settings, asset) => {
 
           return new Promise((resolve, reject) => {
             const errorHandler = (error) => {
-              reject(new Error({ reason: 'Unable to download file', meta: { src, error } }))
+              reject(new Error({
+                reason: 'Unable to download file',
+                meta: { src, error }
+              }));
             };
 
             res.body
