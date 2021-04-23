@@ -60,11 +60,6 @@ const resolve = (xmlObj, assets) => {
       }
       flagIndex += 1;
     }
-
-    if (item[tag] === 'Item') {
-
-
-    }
   });
   return xmlObj;
 }
